@@ -95,6 +95,13 @@ fn compile() {
             cc.define("HAVE_SYS_TYPES_H", Some("1"));
             cc.define("HAVE_SYS_TIME_H", Some("1"));
         }
+        if let Ok(target_env) = env::var("CARGO_CFG_TARGET_ENV") {
+            if target_env == "musl" {
+                cc.flag_if_supported("-U_FORTIFY_SOURCE");
+                cc.flag_if_supported("-D_FORTIFY_SOURCE=0");
+                println!("cargo:info=Resetting _FORTIFY_SOURCE for musl target");
+            }
+        }
 
         // Can't use size_of::<c_long>(), because it'd refer to build arch, not target arch.
         // so instead assume it's a non-exotic target (LP32/LP64).
